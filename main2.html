@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimized HTMX Application</title>
+
+    <!-- DNS Prefetching -->
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js" as="script">
+    <link rel="preload" href="#sprite-sheet" as="image">
+
+    <!-- Critical CSS Inlined -->
+    <style>
+        /* Reset and Critical Styles */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Layout Shell - Prevent Layout Shifts */
+        .app-shell {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            position: fixed;
+            width: 250px;
+            height: 100vh;
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Above the fold content styles */
+        .icon {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        /* Loading States */
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+
+        /* Performance Marker for LCP */
+        .largest-contentful-paint {
+            contain: layout;
+            content-visibility: auto;
+        }
+    </style>
+
+    <!-- Deferred Non-Critical CSS -->
+    <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'">
+
+    <!-- Performance Monitoring -->
+    <script>
+        // Performance Markers
+        performance.mark('page-start');
+        
+        // Core Web Vitals RUM
+        let LCP = 0;
+        new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            LCP = entries[entries.length - 1].startTime;
+            performance.mark('lcp-detected');
+        }).observe({ entryTypes: ['largest-contentful-paint'] });
+
+        // Track First Paint
+        new PerformanceObserver((entryList) => {
+            const entries = entryList.getEntries();
+            performance.mark('first-paint');
+        }).observe({ entryTypes: ['paint'] });
+    </script>
+</head>
+<body>
+    <!-- SVG Sprite Sheet with ID for preloading -->
+    <svg id="sprite-sheet" style="display: none;" aria-hidden="true">
+        <symbol id="icon-settings" viewBox="0 0 24 24">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+        </symbol>
+        <symbol id="account" viewBox="0 0 24 24">
+            <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+        </symbol>
+        <symbol id="security" viewBox="0 0 24 24">
+            <path d="M12 17a2 2 0 0 1-2-2V9c0-1.1.9-2 2-2s2 .9 2 2v6a2 2 0 0 1-2 2zm6-9a6 6 0 0 0-12 0v5.5l-2 2V8c0-4.4 3.6-8 8-8s8 3.6 8 8v7.5l-2-2V8z"/>
+        </symbol>
+        <!-- Add other icons as needed -->
+    </svg>
+
+    <div class="app-shell">
+        <!-- Progressive Enhancement - Basic nav works without JS -->
+        <nav class="sidebar">
+            <a class="sidebar-item" 
+               href="/settings"
+               hx-get="/settings" 
+               hx-target="#main-content"
+               hx-push-url="true"
+               hx-indicator="#loading">
+                <svg class="icon"><use xlink:href="#icon-settings"/></svg>
+                Settings
+            </a>
+            <a hx-get="/account-preferences" 
+                hx-target=".main-content" 
+                hx-trigger="click"
+                hx-push-url="true"
+                class="sidebar-item active">
+                <svg class="icon"><use xlink:href="#account"/></svg>
+                Account preferences
+            </a>
+            <a hx-get="/security" 
+                hx-target=".main-content" 
+                hx-trigger="click"
+                hx-push-url="true"
+                class="sidebar-item">
+                <svg class="icon"><use xlink:href="#security"/></svg>
+                Sign in & security
+            </a>
+        </nav>
+
+        <!-- Main Content Area with Loading State -->
+        <main id="main-content" class="main-content">
+            <div id="loading" class="htmx-indicator">Loading...</div>
+            <div class="largest-contentful-paint">
+                <div class="section-item"
+                    hx-get="/profile/name-location"
+                    hx-target=".main-content"
+                    hx-trigger="click"
+                    hx-push-url="true">
+                    Name, location, and industry
+                    <span class="arrow">›</span>
+                </div>
+                <div class="section-item"
+                    hx-get="/profile/demographics"
+                    hx-target=".main-content"
+                    hx-trigger="click"
+                    hx-push-url="true">
+                    Personal demographic information
+                <span class="arrow">›</span>
+                </div>
+                <div class="section-item"
+                    hx-get="/profile/verifications"
+                    hx-target=".main-content"
+                    hx-trigger="click"
+                    hx-push-url="true">
+                    Verifications
+                    <span class="arrow">›</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registered');
+                })
+                .catch(err => {
+                    console.error('ServiceWorker registration failed:', err);
+                });
+        }
+    </script>
+
+    <!-- HTMX with Deferred Loading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js" 
+            defer
+            onload="performance.mark('htmx-loaded')"></script>
+
+    <!-- Performance Monitoring Completion -->
+    <script>
+        window.addEventListener('load', () => {
+            performance.mark('page-loaded');
+            performance.measure('total-page-load', 'page-start', 'page-loaded');
+            
+            // Report metrics to analytics
+            const metrics = {
+                lcp: LCP,
+                pageLoad: performance.getEntriesByName('total-page-load')[0].duration
+            };
+            
+            // Send to analytics endpoint
+            navigator.sendBeacon('/analytics', JSON.stringify(metrics));
+        });
+    </script>
+</body>
+</html>
+
+

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Work History</title>
+    <!-- Include HTMX -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/1.9.10/htmx.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-right: 1px solid #333;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .sidebar-item:hover {
+            background-color: #333;
+        }
+
+        .sidebar-item.active {
+            background-color: #2d2d2d;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #1a1a1a;
+        }
+
+        .section {
+            background-color: #2d2d2d;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 20px;
+            font-size: 1.2em;
+            font-weight: 500;
+            border-bottom: 1px solid #333;
+        }
+
+        .section-item {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            cursor: pointer;
+        }
+
+        .section-item:last-child {
+            border-bottom: none;
+        }
+
+        .section-item:hover {
+            background-color: #333;
+        }
+
+        .arrow {
+            color: #666;
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Loading indicator styles */
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+        }
+        
+        .htmx-request .htmx-indicator {
+            opacity: 1
+        }
+        
+        .htmx-request.htmx-indicator {
+            opacity: 1
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <!-- Using HTMX to load content dynamically -->
+        <a hx-get="/account-preferences" 
+           hx-target=".main-content" 
+           hx-trigger="click"
+           hx-push-url="true"
+           class="sidebar-item active">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+            </svg>
+            Account preferences
+        </a>
+        <a hx-get="/security" 
+           hx-target=".main-content" 
+           hx-trigger="click"
+           hx-push-url="true"
+           class="sidebar-item">
+            <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 17a2 2 0 0 1-2-2V9c0-1.1.9-2 2-2s2 .9 2 2v6a2 2 0 0 1-2 2zm6-9a6 6 0 0 0-12 0v5.5l-2 2V8c0-4.4 3.6-8 8-8s8 3.6 8 8v7.5l-2-2V8z"/>
+            </svg>
+            Sign in & security
+        </a>
+        <!-- Similar HTMX attributes for other menu items -->
+    </div>
+
+    <div class="main-content">
+        <div class="section">
+            <div class="section-header">Profile information</div>
+            <!-- Using HTMX for dynamic content loading -->
+            <div class="section-item"
+                 hx-get="/profile/name-location"
+                 hx-target=".main-content"
+                 hx-trigger="click"
+                 hx-push-url="true">
+                Name, location, and industry
+                <span class="arrow">›</span>
+            </div>
+            <div class="section-item"
+                 hx-get="/profile/demographics"
+                 hx-target=".main-content"
+                 hx-trigger="click"
+                 hx-push-url="true">
+                Personal demographic information
+                <span class="arrow">›</span>
+            </div>
+            <div class="section-item"
+                 hx-get="/profile/verifications"
+                 hx-target=".main-content"
+                 hx-trigger="click"
+                 hx-push-url="true">
+                Verifications
+                <span class="arrow">›</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header">Display</div>
+            <div class="section-item"
+                 hx-post="/toggle-dark-mode"
+                 hx-trigger="click"
+                 hx-swap="none">
+                Dark mode
+                <span class="arrow">›</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
